@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Client, GatewayIntentBits, Partials } from "discord.js";
+import { Client, GatewayIntentBits, Partials, Events } from "discord.js";
 import cron from "node-cron";
 import dayjs from "dayjs";
 import tz from "dayjs/plugin/timezone.js";
@@ -50,8 +50,8 @@ const Emoji = [
 ];
 
 function pickRandomEmoji() {
-  const i = Math.floor(Math.random() * Emoji.length)
-  return Emoji[i]
+    const i = Math.floor(Math.random() * Emoji.length);
+    return Emoji[i];
 }
 
 // 제목
@@ -64,14 +64,11 @@ function buildTitle(dateKST) {
 
 // 본문 템플릿
 function threadBody(dateKST) {
-    return ["[어제 한 일]", "[오늘 할 일]", "[이슈 / 공유사항]", ""].join(
-        "\n"
-    );
+    return ["[어제 한 일]", "[오늘 할 일]", "[이슈 / 공유사항]", ""].join("\n");
 }
 
-async function postDailyScrum() {
+async function postDailyScrum({ test = false } = {}) {
     const now = dayjs().tz(TZ);
-    const weekday = now.day();
     // 평일만: 1~5, 주말 스킵하려면 아래 if 유지
     //   if (weekday === 0 || weekday === 6) {
     //     console.log('주말 스킵')
@@ -85,8 +82,9 @@ async function postDailyScrum() {
     }
 
     const title = buildTitle(now);
-    const emoji = pickRandomEmoji()
-    const headline = `${emoji} ${title} ${emoji}`;
+    const emoji = pickRandomEmoji();
+    const headline = test ? "배포테스트" : `${emoji} ${title} ${emoji}`;
+    const archiveMinutes = test ? 60 : 10080
 
     try {
         // 헤드라인 메시지
@@ -95,7 +93,7 @@ async function postDailyScrum() {
         // 스레드 생성
         const thread = await msg.startThread({
             name: `${title}`,
-            autoArchiveDuration: 10080, // 분 단위: 1440(24h), 10080(1주일)
+            autoArchiveDuration: archiveMinutes,
             reason: "Daily Scrum auto thread",
         });
 
@@ -108,8 +106,10 @@ async function postDailyScrum() {
     }
 }
 
-client.once("ready", () => {
+client.once(Events.ClientReady, () => {
     console.log(`Logged in as ${client.user.tag}`);
+
+    postDailyScrum({ test: true });
 
     // 매일 07:00 KST
     cron.schedule(
