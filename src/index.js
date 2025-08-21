@@ -109,7 +109,7 @@ async function postDailyScrum({ test = false } = {}) {
 client.once(Events.ClientReady, () => {
     console.log(`Logged in as ${client.user.tag}`);
 
-    postDailyScrum({ test: true });
+    // postDailyScrum({ test: true });
 
     // 매일 07:00 KST
     cron.schedule(
