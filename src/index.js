@@ -84,7 +84,7 @@ async function postDailyScrum({ test = false } = {}) {
     const title = buildTitle(now);
     const emoji = pickRandomEmoji();
     const headline = test ? "배포테스트" : `${emoji} ${title} ${emoji}`;
-    const archiveMinutes = test ? 60 : 10080
+    const archiveMinutes = test ? 60 : 1440;
 
     try {
         // 헤드라인 메시지
