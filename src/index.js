@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import tz from "dayjs/plugin/timezone.js";
 import utc from "dayjs/plugin/utc.js";
 import "dayjs/locale/ko.js";
+import { weekdays } from "dayjs/locale/ko.js";
 
 dayjs.extend(utc);
 dayjs.extend(tz);
@@ -69,11 +70,10 @@ function threadBody(dateKST) {
 
 async function postDailyScrum({ test = false } = {}) {
     const now = dayjs().tz(TZ);
-    // 평일만: 1~5, 주말 스킵하려면 아래 if 유지
-    //   if (weekday === 0 || weekday === 6) {
-    //     console.log('주말 스킵')
-    //     return
-    //   }
+    // 수요일 스킵
+      if (weekday === 3) {
+        return
+      }
 
     const channel = await client.channels.fetch(CHANNEL_ID).catch(() => null);
     if (!channel || !channel.isTextBased()) {
@@ -98,7 +98,7 @@ async function postDailyScrum({ test = false } = {}) {
         });
 
         // 3) 스레드에 첫 댓글(템플릿)
-        await thread.send(`**${headline}**\n\n${threadBody(now)}`);
+        await thread.send(`${threadBody(now)}`);
 
         console.log(`스크럼 생성: ${title}`);
     } catch (err) {
