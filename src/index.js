@@ -5,7 +5,6 @@ import dayjs from "dayjs";
 import tz from "dayjs/plugin/timezone.js";
 import utc from "dayjs/plugin/utc.js";
 import "dayjs/locale/ko.js";
-import { weekdays } from "dayjs/locale/ko.js";
 
 dayjs.extend(utc);
 dayjs.extend(tz);
@@ -70,10 +69,11 @@ function threadBody(dateKST) {
 
 async function postDailyScrum({ test = false } = {}) {
     const now = dayjs().tz(TZ);
+    const weekday = now.day();
     // 수요일 스킵
-      if (weekday === 3) {
-        return
-      }
+    if (weekday === 3) {
+        return;
+    }
 
     const channel = await client.channels.fetch(CHANNEL_ID).catch(() => null);
     if (!channel || !channel.isTextBased()) {
